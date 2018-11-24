@@ -13,7 +13,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
-
+#include <string>
 #include <signal.h>
 #include <memory>
 
@@ -21,18 +21,14 @@ void *genRanNum(void *arg);
 void *showNum(void *arg);
 
 void* genRanNum(void *arg){
-    long n;
-    n = (long)arg;
-
+    int n = *((int *)arg);
     for(int i=0;i<n;i++)
         std::cout << "genRanNum: " << i << std::endl;
     return 0;
 }
 
 void* showNum(void *arg){
-    long t;
-    t = long(arg);
-    
+    int t = *((int *)arg);
     for(int j=0;j<t;j++)
         std::cout << "showNum: " << j << std::endl;
     return 0;
@@ -73,14 +69,14 @@ int main(int argc, char **argv) {
     pthread_t thread1, thread2;
     int  iret1, iret2;
     
-    iret1 = pthread_create( &thread1, NULL, genRanNum, (void *)n);
+    iret1 = pthread_create( &thread1, NULL, genRanNum, (void *)&n);
     if(iret1)
     {
         fprintf(stderr,"Error - pthread_create() return code: %d\n",iret1);
         return -1;
     }
     
-    iret2 = pthread_create( &thread2, NULL, showNum, (void *)t);
+    iret2 = pthread_create( &thread2, NULL, showNum, (void *)&t);
     if(iret2)
     {
         fprintf(stderr,"Error - pthread_create() return code: %d\n",iret2);
