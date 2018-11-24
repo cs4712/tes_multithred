@@ -37,7 +37,7 @@ void* showNum(void *arg){
         std::cout << "showNum: " << j << std::endl;
     return 0;
 }
-int main(int argc, const char * argv[]) {
+int main(int argc, char **argv) {
     
     int n = 0;   // random range
     int t = 0;   // top t frequent numbers
