@@ -6,19 +6,16 @@
 //  Copyright © 2018年 Shi Cheng. All rights reserved.
 //
 
-#include <iostream>
-#include <fstream>
 #include <stdio.h>
+#include <iostream>
 #include <vector>
 #include <algorithm>
 #include <pthread.h>
 #include <semaphore.h>
 #include <unistd.h>
-#include <vector>
-#include <string>
-#include <time.h>
 
-#include <stdlib.h>
+#include <signal.h>
+#include <memory>
 
 void *genRanNum(void *arg);
 void *showNum(void *arg);
