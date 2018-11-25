@@ -22,7 +22,7 @@ pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
 int n = 0;   // random range
 int t = 0;   // top t frequent numbers
-
+int occurences = 0;
 std::vector <int> res;
 std::map<int, int> top;
 
@@ -39,6 +39,13 @@ void* genRanNum(void *arg){
     std::ifstream urandom("/dev/urandom");
     while(1){
         pthread_mutex_lock( &mutex1 );
+        
+        // if every number occurs once, exit
+        if (occurences >= n){
+            pthread_mutex_unlock( &mutex1 );
+            return 0;
+        }
+        
         unsigned int ran0 = 1;
         urandom.read((char*)&ran0, sizeof(unsigned int));
         int ran = ran0%(n+1);
@@ -47,7 +54,7 @@ void* genRanNum(void *arg){
         std::cout << "genRanNum: " << ran << std::endl;
         
         pthread_mutex_unlock( &mutex1 );
-        usleep(1000);
+        usleep(100000);
     }
     
     return 0;
@@ -64,36 +71,35 @@ void* showNum(void *arg){
         int t = *((int *)arg);
         std::vector<std::pair<int, int> > sortTop;
         
-        for (auto it = top.begin(); it != top.end(); it++)
+        for (std::map<int, int>::iterator it = top.begin(); it != top.end(); it++)
             sortTop.push_back(std::make_pair(it->first, it->second));
         // sort by value (times of occurences)
 
         sort(sortTop.begin(), sortTop.end(), cmp);
         
-        if (t >= n+1){
-            std::cout << "showNum: ";
-            for (std::vector<std::pair<int, int> >::iterator it = sortTop.begin(); it != sortTop.end(); it++){
-                std::cout << it->first << ' ';
-            }
-            std::cout << std::endl;
-        }
-        else {
-            int sum = 0;
-            std::cout << "showNum: ";
-            for (std::vector<std::pair<int, int> >::iterator it = sortTop.begin(); it != sortTop.end(); it++){
-                std::cout << it->first << ' ';
-                sum++;
-                if (sum>t){
-                    break;
-                }
-            }
-            std::cout << std::endl;
-        }
-            
-//        for(int j=0;j<t;j++)
-//            std::cout << "showNum: " << &res << std::endl;
+        int sum = 0;
+        occurences = 0;
         
-        pthread_mutex_unlock( &mutex1 );
+        for (std::vector<std::pair<int, int> >::iterator it = sortTop.begin(); it != sortTop.end(); it++){
+            sum++;
+            if (it->second == 0)
+                continue;
+            
+            std::cout << it->first << ' ';
+            occurences++;
+            
+            // if every number occurs once, exit
+            if (occurences >= n){
+                pthread_mutex_unlock( &mutex1 );
+                return 0;
+            }
+            if (sum > t){
+                break;
+            }
+        }
+        std::cout << std::endl;
+        
+        
         sleep(5);
     }
     return 0;
