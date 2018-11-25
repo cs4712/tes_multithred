@@ -34,8 +34,7 @@ void* genRanNum(void *arg){
     
     
     int n = *((int *)arg);
-//    for(int i=0;i<n;i++)
-//        std::cout << "genRanNum: " << i << std::endl;
+
     std::ifstream urandom("/dev/urandom");
     while(1){
         pthread_mutex_lock( &mutex1 );
@@ -50,8 +49,6 @@ void* genRanNum(void *arg){
         urandom.read((char*)&ran0, sizeof(unsigned int));
         int ran = ran0%(n+1);
         top[ran]++;
-        
-        std::cout << "genRanNum: " << ran << std::endl;
         
         pthread_mutex_unlock( &mutex1 );
         usleep(100000);
@@ -74,7 +71,6 @@ void* showNum(void *arg){
         for (std::map<int, int>::iterator it = top.begin(); it != top.end(); it++)
             sortTop.push_back(std::make_pair(it->first, it->second));
         // sort by value (times of occurences)
-
         sort(sortTop.begin(), sortTop.end(), cmp);
         
         int sum = 0;
@@ -88,24 +84,23 @@ void* showNum(void *arg){
             std::cout << it->first << ' ';
             occurences++;
             
-            // if every number occurs once, exit
-            if (occurences >= n){
-                pthread_mutex_unlock( &mutex1 );
-                return 0;
-            }
-            if (sum > t){
+            if (sum >= t)
                 break;
-            }
         }
+        // if every number occurs once, exit
+        if (occurences >= n){
+            pthread_mutex_unlock( &mutex1 );
+            return 0;
+        }
+        
         std::cout << std::endl;
         
-        
+        pthread_mutex_unlock( &mutex1 );
         sleep(5);
     }
     return 0;
 }
 int main(int argc, char **argv) {
-    
     
     int a;
     std::string nvalue, tvalue;
