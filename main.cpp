@@ -10,12 +10,9 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 #include <pthread.h>
 #include <unistd.h>
-#include <string>
 #include <map>
-#include <time.h>
 #include <algorithm> // sort
 
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
@@ -23,7 +20,6 @@ pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 int n = 0;   // random range
 int t = 0;   // top t frequent numbers
 int occurences = 0;
-std::vector <int> res;
 std::map<int, int> top;
 
 void *genRanNum(void *arg);
@@ -40,7 +36,7 @@ void* genRanNum(void *arg){
         pthread_mutex_lock( &mutex1 );
         
         // if every number occurs once, exit
-        if (occurences >= n){
+        if (occurences == n+1){
             pthread_mutex_unlock( &mutex1 );
             return 0;
         }
@@ -88,9 +84,9 @@ void* showNum(void *arg){
                 break;
         }
         std::cout << std::endl;
-        
+        std::cout << occurences << std::endl;
         // if every number occurs once, exit
-        if (occurences >= n){
+        if (occurences == n+1){
             pthread_mutex_unlock( &mutex1 );
             return 0;
         }
