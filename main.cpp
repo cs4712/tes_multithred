@@ -87,14 +87,14 @@ void* showNum(void *arg){
             if (sum >= t)
                 break;
         }
+        std::cout << std::endl;
+        
         // if every number occurs once, exit
         if (occurences >= n){
             pthread_mutex_unlock( &mutex1 );
             return 0;
         }
-        
-        std::cout << std::endl;
-        
+    
         pthread_mutex_unlock( &mutex1 );
         sleep(5);
     }
