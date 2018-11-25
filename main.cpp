@@ -14,11 +14,16 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <string>
+#include <map>
 #include <time.h>
 
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
+int n = 0;   // random range
+int t = 0;   // top t frequent numbers
+
 std::vector <int> res;
+std::map<int, int> top;
 
 void *genRanNum(void *arg);
 void *showNum(void *arg);
@@ -34,29 +39,63 @@ void* genRanNum(void *arg){
         pthread_mutex_lock( &mutex1 );
         unsigned int ran0 = 1;
         urandom.read((char*)&ran0, sizeof(unsigned int));
-        int ran = ran0%n;
-        res.push_back(ran);
+        int ran = ran0%(n+1);
+        top[ran]++;
+        
         std::cout << "genRanNum: " << ran << std::endl;
+        
         pthread_mutex_unlock( &mutex1 );
+        usleep(1000);
     }
     
     return 0;
 }
 
 void* showNum(void *arg){
-    pthread_mutex_lock( &mutex1 );
-    
-    int t = *((int *)arg);
-    for(int j=0;j<t;j++)
-        std::cout << "showNum: " << j << std::endl;
-    
-    pthread_mutex_unlock( &mutex1 );
+    while (1){
+        pthread_mutex_lock( &mutex1 );
+        
+        int t = *((int *)arg);
+        std::vector<std::pair<int, int>> sortTop;
+        
+        for (auto it = top.begin(); it != top.end(); it++)
+            sortTop.push_back(std::make_pair(it->first, it->second));
+        // sort by value (times of occurences)
+        sort(sortTop.begin(), sortTop.end(),
+             [](const std::pair<int, int> &x, const std::pair<int, int> &y) -> int {
+                 return x.second > y.second;
+             });
+        
+        if (t >= n+1){
+            
+            for (auto it = sortTop.begin(); it != sortTop.end(); it++){
+                std::cout << it->first << ' ';
+            }
+            std::cout << std::endl;
+        }
+        else {
+            int sum = 0;
+            std::cout << "showNum: ";
+            for (auto it = sortTop.begin(); it != sortTop.end(); it++){
+                std::cout << it->first << ' ';
+                sum++;
+                if (sum>t){
+                    break;
+                }
+            }
+            std::cout << std::endl;
+        }
+            
+//        for(int j=0;j<t;j++)
+//            std::cout << "showNum: " << &res << std::endl;
+        
+        pthread_mutex_unlock( &mutex1 );
+        sleep(5);
+    }
     return 0;
 }
 int main(int argc, char **argv) {
     
-    int n = 0;   // random range
-    int t = 0;   // top t frequent numbers
     
     int a;
     std::string nvalue, tvalue;
@@ -88,6 +127,11 @@ int main(int argc, char **argv) {
             return 1;
         default:
             return 0;
+    }
+    
+    // initial map
+    for(int i=0;i<=n;i++){
+        top[0] = 0;
     }
     
     std::ifstream urandom("/dev/urandom");
