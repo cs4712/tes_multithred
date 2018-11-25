@@ -16,6 +16,7 @@
 #include <string>
 #include <map>
 #include <time.h>
+#include <algorithm> // sort
 
 pthread_mutex_t mutex1 = PTHREAD_MUTEX_INITIALIZER;
 
@@ -27,6 +28,7 @@ std::map<int, int> top;
 
 void *genRanNum(void *arg);
 void *showNum(void *arg);
+int cmp(const std::pair<int, int> &x, const std::pair<int, int> &y);
 
 void* genRanNum(void *arg){
     
@@ -69,8 +71,8 @@ void* showNum(void *arg){
         sort(sortTop.begin(), sortTop.end(), cmp);
         
         if (t >= n+1){
-            
-            for (auto it = sortTop.begin(); it != sortTop.end(); it++){
+            std::cout << "showNum: ";
+            for (std::vector<std::pair<int, int> >::iterator it = sortTop.begin(); it != sortTop.end(); it++){
                 std::cout << it->first << ' ';
             }
             std::cout << std::endl;
@@ -78,7 +80,7 @@ void* showNum(void *arg){
         else {
             int sum = 0;
             std::cout << "showNum: ";
-            for (auto it = sortTop.begin(); it != sortTop.end(); it++){
+            for (std::vector<std::pair<int, int> >::iterator it = sortTop.begin(); it != sortTop.end(); it++){
                 std::cout << it->first << ' ';
                 sum++;
                 if (sum>t){
