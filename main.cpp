@@ -51,20 +51,22 @@ void* genRanNum(void *arg){
     return 0;
 }
 
+int cmp(const std::pair<int, int> &x, const std::pair<int, int> &y){
+    return x.second > y.second;
+}
+
 void* showNum(void *arg){
     while (1){
         pthread_mutex_lock( &mutex1 );
         
         int t = *((int *)arg);
-        std::vector<std::pair<int, int>> sortTop;
+        std::vector<std::pair<int, int> > sortTop;
         
         for (auto it = top.begin(); it != top.end(); it++)
             sortTop.push_back(std::make_pair(it->first, it->second));
         // sort by value (times of occurences)
-        sort(sortTop.begin(), sortTop.end(),
-             [](const std::pair<int, int> &x, const std::pair<int, int> &y) -> int {
-                 return x.second > y.second;
-             });
+
+        sort(sortTop.begin(), sortTop.end(), cmp);
         
         if (t >= n+1){
             
